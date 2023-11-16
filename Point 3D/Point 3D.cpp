@@ -12,23 +12,33 @@ private:
     size_type x_n_size;
 public:
     template <typename first, typename ...args>
-    Grid(T const& t, first size1, args... size) : data(new Grid<T, N - 1>[size1]), x_n_size(size1){
+    Grid(T const& t, first size1, args... size) : data(new Grid<T, N-1>[size1]), x_n_size(size1) {
         for (size_type i = 0; i != size1; ++i) {
             data[i] = Grid<T, N-1>(t, size...);
         }
     }
 
+    Grid() : data(new Grid<T, N - 1>[1]), x_n_size(1) {}
+
     Grid(Grid<T, N> const& other) : data(other.data), x_n_size(other.x_n_size) {}
 
-   ~Grid() {
-        delete[] data;
+   ~Grid(){
+       delete[] data;
    }
 
-    Grid<T, N>& operator=(Grid<T, N>& other) {
-        x_n_size = other.x_n_size;
+   Grid<T, N>& operator=(Grid<T, N>& other) {
         delete[] data;
-        T* data = new T[x_n_size];
-        memcpy(data, other.data, x_n_size * sizeof(Grid<T, N-1>));
+        data = new Grid<T, N-1>[other.x_n_size];
+        x_n_size = other.x_n_size;
+        for (int i = 0; i != x_n_size; ++i) {
+            data[i] = other.data[i];
+        }
+        return *this;
+   }
+
+    Grid<T, N>& operator=(Grid<T, N>&& other) {
+        swap(data, other.data);
+        swap(x_n_size, other.x_n_size);
         return *this;
     }
 
@@ -88,12 +98,6 @@ public:
     Grid(size_type y_size, size_type x_size) : data(new T[x_size * y_size]), y_size(y_size), x_size(x_size) {
         for (size_type i = 0; i != x_size * y_size; ++i) {
             data[i] = T();
-        }
-    }
-
-    Grid(size_type y_size, size_type x_size, T const& t) : data(new T[x_size * y_size]), y_size(y_size), x_size(x_size) {
-        for (size_type i = 0; i != x_size * y_size; ++i) {
-            data[i] = t;
         }
     }
 
